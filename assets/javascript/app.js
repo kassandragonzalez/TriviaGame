@@ -10,4 +10,12 @@ $(document).ready(function(){
 
 var trivia = {
     //trvia properties 
+    correct: 0, 
+    incorrect: 0,
+    unanswered: 0, 
+    currentSet: 0, 
+    timer: 30, 
+    timerOn: false,
+    timerId: "",
+    
 }
