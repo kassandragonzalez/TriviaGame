@@ -11,7 +11,7 @@ var trivia = {
   incorrect: 0,
   unanswered: 0,
   current: 0,
-  timer: 30,
+  timer: 20,
   timerOn: false,
   timerId: "",
   // question options and answers
@@ -25,7 +25,7 @@ var trivia = {
     q6: 'In S3E5 "Initiation" What song does Jim sing to annoy Karen?',
     q7: 'In S6E7 "Koi Pond" Who fell into the koi pond?',
     q8:
-      'In S6E19 "Happy Hour" What clothing item transforms Michael into Date Mike?', //110
+      'In S6E19 "Happy Hour" What clothing item transforms Michael into Date Mike?',
     q9: 'In S3E21 "Womens Appreciation" Who gets flashed in the parking lot?',
     q10:
       "In S9E23 what activity does the office choose to do on Darryls last day?"
@@ -68,16 +68,16 @@ var trivia = {
     ]
   },
   answers: {
-    q1: "Thats what she said",
-    q2: "Three Hole Punch Jim",
-    q3: "Angela",
-    q4: "He burns his foot on a George Foreman Grill",
-    q5: "Kevin",
-    q6: "Lovefool by The Cardigans",
-    q7: "Michael",
-    q8: "A backwards golf cap",
-    q9: "Phillis",
-    q10: "Dance Party"
+      q1: "Thats what she said",
+      q2: "Three Hole Punch Jim",
+      q3: "Angela",
+      q4: "He burns his foot on a George Foreman Grill",
+      q5: "Kevin",
+      q6: "Lovefool by The Cardigans",
+      q7: "Michael",
+      q8: "A backwards golf cap",
+      q9: "Phillis",
+      q10: "Dance Party"
   },
   // methods to start game
   startGame: function() {
@@ -88,12 +88,127 @@ var trivia = {
     trivia.correct = 0;
     clearInterval(trivia.timerId);
 
-    $('#game').show();
-    $('#results').html(''); 
-    $('#timer').text(trivia.timer);
-    $('#start').hide();
-    $('#remaining-time').show();
+    //show
+    $("#game").show();
+    $("#results").html("");
+    $("#timer").text(trivia.timer);
 
-    
+    $("#start").hide();
+    $("#remaining-time").show();
+
+    trivia.nextQuestion();
+  },
+
+  nextQuestion: function() {
+    //timer set for 20 seconds a question
+    trivia.timer = 20;
+   // $("#timer").removeClass("last-seconds");
+    $("#timer").text(trivia.timer);
+
+    //timer
+    if (!trivia.timerOn) {
+      trivia.timerId = setInterval(trivia.timerRunning, 1000);
+    }
+
+    //gets all the questions then indexes the current questions
+    var questionContent = Object.values(trivia.questions)[trivia.current];
+    $("#question").text(questionContent);
+
+    //array of all options for the current question
+    var questionOptions = Object.values(trivia.options)[trivia.current];
+
+    //creates all the trivia guess options in html
+    $.each(questionOptions, function(index, key) {
+      $("#options").append(
+        $('<button class="option btn btn-info btn-lg"> ' + key + " </button>")
+      );
+    });
+  },
+  //method for counter if timer runs out
+  timerRunning: function() {
+    //timer has time left and questions left to ask
+    if (
+      trivia.timer > -1 &&
+      trivia.current < Object.keys(trivia.questions).length) {
+      $("#timer").text(trivia.timer);
+      trivia.timer--;
+      if (trivia.timer === 4) {
+       $("#timer").addClass("last-seconds");
+      }
+    } else if (trivia.timer === -1) {
+      trivia.unanswered++;
+      trivia.result = false;
+      clearInterval(trivia.timerId);
+      resultId = setTimeout(trivia.guessResult, 1000);
+      $("#results").html(
+        "<h2>Out of time! The answer was " +
+          Object.values(trivia.answers)[trivia.current] +
+          "</h2>"
+      );
+    } else if (trivia.current === Object.keys(trivia.questions).length) {
+      //adds results of game to page
+      $("#results").html(
+        "<p>Correct: " +
+          trivia.correct +
+          "</p> " +
+          "<p>Incorrect: " +
+          trivia.incorrect +
+          "</p>" +
+          "<p>Unanswered: " +
+          trivia.unanswered +
+          "</p>" +
+          "<p>Play again!</p>"
+      );
+
+      //hide game
+      $("#game").hide();
+
+      //show start button for game
+      $("#start").show();
+    }
+  },
+  //method for option clicked
+  guessChecker: function() {
+    //timer ID for gameresult set time
+    var resultId;
+
+    //answer to current question being asked
+    var currentAnswer = Object.values(trivia.answers)[trivia.current];
+
+    //if text of option equals answer of question, correct
+    if ($(this).text() === currentAnswer) {
+      $(this).addClass("btn-success").removeClass("btn-info");
+
+      trivia.correct++;
+      clearInterval(trivia.timerId);
+      resultId = setTimeout(trivia.guessResult, 1000);
+      $("#results").html("<h2>Correct Answer!</h2>" + correctAnswer);
+    }
+
+    //user picked wrong option, incorrect
+    else {
+      $(this)
+        .addClass("btn-danger")
+        .removeClass("btn-info");
+
+      //turn button red for incorrect
+      trivia.incorrect++;
+      clearInterval(trivia.timerId);
+      resultId = setTimeout(trivia.guessResult, 1000);
+      $("#results").html('');
+    }
+  },
+
+  //method to remove previous question and options
+  guessResult: function() {
+    //increment to next question set
+    trivia.current++;
+
+    //remove options and results
+    $(".option").remove();
+    $("#results h2").remove();
+
+    //begin next question
+    trivia.nextQuestion();
   }
 };

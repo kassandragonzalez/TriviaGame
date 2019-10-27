@@ -1,8 +1,7 @@
-.background {
-  width: 100px;
-  height: 100px;
-}
 h1 {
-  display: flex;
-  justify-content: center;
+  color: black;
+}
+
+.option {
+  margin: 15px;
 }
